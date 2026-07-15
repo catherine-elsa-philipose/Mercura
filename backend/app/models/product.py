@@ -17,6 +17,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.business import Business
+    from app.models.invoice_item import InvoiceItem
     from app.models.stock_adjustment import StockAdjustment
 
 
@@ -110,6 +111,12 @@ class Product(Base):
 
     stock_adjustments: Mapped[list["StockAdjustment"]] = relationship(
         "StockAdjustment",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
+
+    invoice_items: Mapped[list["InvoiceItem"]] = relationship(
+        "InvoiceItem",
         back_populates="product",
         cascade="all, delete-orphan",
     )

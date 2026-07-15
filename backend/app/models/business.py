@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, DateTime
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -10,6 +10,8 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.business_member import BusinessMember
     from app.models.customer import Customer
+    from app.models.invoice import Invoice
+    from app.models.payment import Payment
     from app.models.product import Product
     from app.models.stock_adjustment import StockAdjustment
 
@@ -60,6 +62,18 @@ class Business(Base):
 
     stock_adjustments: Mapped[list["StockAdjustment"]] = relationship(
         "StockAdjustment",
+        back_populates="business",
+        cascade="all, delete-orphan",
+    )
+
+    invoices: Mapped[list["Invoice"]] = relationship(
+        "Invoice",
+        back_populates="business",
+        cascade="all, delete-orphan",
+    )
+
+    payments: Mapped[list["Payment"]] = relationship(
+        "Payment",
         back_populates="business",
         cascade="all, delete-orphan",
     )

@@ -23,6 +23,9 @@ from app.models.business_member import BusinessMember
 from app.models.customer import Customer
 from app.models.product import Product
 from app.models.stock_adjustment import StockAdjustment
+from app.models.invoice import Invoice
+from app.models.invoice_item import InvoiceItem
+from app.models.payment import Payment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
