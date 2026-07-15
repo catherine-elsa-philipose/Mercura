@@ -1,6 +1,87 @@
-# Mercura Project
-# 
-# Phase 4: Business Workspaces and Membership Foundation
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.x-red)
+![Flutter](https://img.shields.io/badge/Flutter-Web-02569B)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+# Mercura
+
+## Current Version
+
+**Version:** v0.6.0
+
+**Status:** Completed through Phase 6 – Products & Inventory Foundation
+
+---
+
+## Project Overview
+
+Mercura is a production-oriented multi-tenant Business Operations and Commerce Platform designed for small and medium-sized businesses.
+
+It enables businesses to securely manage workspaces, employees, customers, products, inventory, and future billing operations while ensuring complete tenant isolation and role-based access control.
+
+The backend is built with FastAPI, SQLAlchemy, Alembic, and PostgreSQL, while the frontend is being developed using Flutter Web.
+
+
+## Features
+
+### Authentication
+- JWT Authentication
+- Secure Password Hashing (Argon2)
+- User Registration & Login
+- Protected API Endpoints
+
+### Multi-Tenant Business Management
+- Business Workspaces
+- Business Memberships
+- Role-Based Access Control (OWNER, MANAGER, STAFF)
+- Tenant Isolation
+
+### Customer Management
+- Customer CRUD Operations
+- Customer Search
+- Pagination
+- Customer Soft Deactivation
+
+### Product & Inventory Management
+- Product CRUD Operations
+- Product Search
+- SKU & Barcode Support
+- Inventory Tracking
+- Stock Adjustment History
+- Low Stock Detection
+- Atomic Inventory Updates
+
+### Developer Experience
+- FastAPI Interactive Swagger UI
+- SQLAlchemy ORM
+- Alembic Database Migrations
+- Unit Testing with Pytest
+- PostgreSQL (Neon)
+
+## Project Architecture
+```
+                    Mercura
+                        │
+        ┌───────────────┴────────────────┐
+        │                                │
+   Flutter Web Frontend          FastAPI Backend
+                                         │
+                          ┌──────────────┴──────────────┐
+                          │                             │
+                     SQLAlchemy ORM             Alembic Migrations
+                          │
+                    PostgreSQL (Neon)
+```
+
+The backend follows a layered architecture:
+
+- **API Layer** – FastAPI routes and request handling
+- **Schemas Layer** – Pydantic request/response validation
+- **Models Layer** – SQLAlchemy ORM models
+- **Database Layer** – PostgreSQL with Alembic migrations
+- **Authentication Layer** – JWT + Role-Based Access Control
 
 ## Stack
 - Frontend: Flutter (Web), Dart, Material 3
@@ -29,7 +110,7 @@ This means one user can belong to multiple workspaces with different roles.
 
 Role values are validated by Python enum and by a database-level CHECK constraint `ck_business_members_role_valid`.
 
-## Project Structure
+## Repository Structure
 - `/backend`: FastAPI backend with SQLAlchemy ORM and Alembic migrations
 - `/frontend`: Flutter Web frontend
 - `/docs`: Architecture and internship documentation
@@ -107,14 +188,53 @@ flutter run -d chrome
 - Business creation is atomic: Business + OWNER membership are committed together or rolled back together.
 - Roles are checked server-side only. Frontend role display is never trusted.
 
-## Current Status
-- **Phase 3**: Authentication Foundation — complete and verified.
-- **Phase 4**: Business Workspaces and Membership Foundation — complete and verified.
-- **Phase 5**: Customers Module — complete and verified.
-- **Phase 6**: Products & Inventory Module — complete and verified.
-- **Migrations applied**: All migrations up to `stock_adjustments` table are live in Neon PostgreSQL.
-- **Tests**: 78 passed, 4 skipped (DB integration tests blocked without isolated schema).
+## Current Progress
 
-## Note
-Phase 4, 5, and 6 establish the core multi-tenant data structures, customer records, and product/inventory tracking. Billing and payment data isolation across tenants is planned for future phases.
+| Phase | Status |
+|-------|--------|
+| Phase 0 – Planning | ✅ Complete |
+| Phase 1 – Backend Foundation | ✅ Complete |
+| Phase 2 – Authentication | ✅ Complete |
+| Phase 3 – Business Workspace | ✅ Complete |
+| Phase 4 – Business Foundation | ✅ Complete |
+| Phase 5 – Customer Management | ✅ Complete |
+| Phase 6 – Products & Inventory Foundation | ✅ Complete |
+| Phase 7 – Billing & Payments | 🚧 Planned |
+| Phase 8 – Dashboard & Analytics | 🚧 Planned |
+| Phase 9 – Flutter + AI Business Assistant | 🚧 Planned |
+| Phase 10 – Production & Deployment | 🚧 Planned |
 
+### Phase 6 Summary
+
+- ✅ Multi-tenant architecture implemented
+- ✅ JWT Authentication & RBAC
+- ✅ Business workspace management
+- ✅ Customer management
+- ✅ Product management
+- ✅ Inventory tracking with stock adjustments
+- ✅ Low-stock detection
+- ✅ Alembic database migrations
+- ✅ Swagger/OpenAPI documentation
+- ✅ Backend test suite (78 passed, 4 skipped)
+  ## Roadmap
+
+### ✅ Completed
+- Authentication
+- Business Workspaces
+- Customer Management
+- Product Management
+- Inventory Foundation
+
+### 🚧 Next
+- Billing & Payments
+
+### 📅 Future
+- Dashboard & Analytics
+- Flutter Web Frontend
+- AI Business Assistant
+- Docker Deployment
+- CI/CD Pipeline
+
+## License
+
+This project is licensed under the MIT License.
