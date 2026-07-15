@@ -75,6 +75,7 @@ flutter run -d chrome
 ```
 
 ## API Endpoints
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/` | No | Health ping |
@@ -85,6 +86,21 @@ flutter run -d chrome
 | POST | `/businesses` | Yes | Create workspace (creator → OWNER) |
 | GET | `/businesses` | Yes | List caller's memberships |
 | GET | `/businesses/{id}` | Yes | Get workspace (member-only) |
+| **Customers** | | | |
+| POST | `/businesses/{bid}/customers` | Yes (OWNER, MANAGER, STAFF) | Create customer |
+| GET | `/businesses/{bid}/customers` | Yes | List/search customers (paginated) |
+| GET | `/businesses/{bid}/customers/{cid}` | Yes | Get customer by ID |
+| PATCH | `/businesses/{bid}/customers/{cid}` | Yes (OWNER, MANAGER, STAFF) | Update customer details |
+| PATCH | `/businesses/{bid}/customers/{cid}/deactivate` | Yes (OWNER, MANAGER) | Deactivate customer |
+| **Products** | | | |
+| POST | `/businesses/{bid}/products` | Yes (OWNER, MANAGER) | Create product |
+| GET | `/businesses/{bid}/products` | Yes | List/search products (paginated) |
+| GET | `/businesses/{bid}/products/low-stock` | Yes | List low-stock products (paginated) |
+| GET | `/businesses/{bid}/products/{pid}` | Yes | Get product by ID |
+| PATCH | `/businesses/{bid}/products/{pid}` | Yes (OWNER, MANAGER, STAFF) | Update product details |
+| PATCH | `/businesses/{bid}/products/{pid}/deactivate` | Yes (OWNER, MANAGER) | Deactivate product |
+| POST | `/businesses/{bid}/products/{pid}/stock` | Yes (OWNER, MANAGER, STAFF) | Record stock adjustment (updates stock atomically) |
+| GET | `/businesses/{bid}/products/{pid}/stock` | Yes | List stock adjustment history (paginated) |
 
 ## Security Design
 - Membership access is backend-enforced. Non-members receive `404 Not Found` to prevent business existence leakage.
@@ -94,9 +110,11 @@ flutter run -d chrome
 ## Current Status
 - **Phase 3**: Authentication Foundation — complete and verified.
 - **Phase 4**: Business Workspaces and Membership Foundation — complete and verified.
-- **Migrations applied**: `users`, `businesses`, `business_members` tables are live in Neon PostgreSQL.
-- **Tests**: 28 passed, 2 skipped (DB integration tests blocked without isolated schema).
+- **Phase 5**: Customers Module — complete and verified.
+- **Phase 6**: Products & Inventory Module — complete and verified.
+- **Migrations applied**: All migrations up to `stock_adjustments` table are live in Neon PostgreSQL.
+- **Tests**: 78 passed, 4 skipped (DB integration tests blocked without isolated schema).
 
 ## Note
-Phase 4 establishes the workspace and membership foundation for future multi-tenancy. Customer, product, inventory, billing, and payment data isolation across tenants does not exist yet — those modules are planned for future phases.
+Phase 4, 5, and 6 establish the core multi-tenant data structures, customer records, and product/inventory tracking. Billing and payment data isolation across tenants is planned for future phases.
 
