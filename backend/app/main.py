@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes import auth, businesses, customers, products, invoices, payments
+from app.api.routes import auth, businesses, customers, products, invoices, payments, dashboard, assistant
 
 app = FastAPI(
     title="Mercura API",
@@ -37,6 +37,18 @@ app.include_router(
     payments.router,
     prefix="/businesses/{business_id}",
     tags=["payments"]
+)
+
+app.include_router(
+    dashboard.router,
+    prefix="/businesses/{business_id}/dashboard",
+    tags=["dashboard"]
+)
+
+app.include_router(
+    assistant.router,
+    prefix="/businesses/{business_id}/assistant",
+    tags=["assistant"]
 )
 
 

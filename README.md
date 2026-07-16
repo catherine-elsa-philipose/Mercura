@@ -9,9 +9,9 @@
 
 ## Current Version
 
-**Version:** v0.6.0
+**Version:** v0.9.0
 
-**Status:** Completed through Phase 6 – Products & Inventory Foundation
+**Status:** Completed through Phase 9 – Flutter + AI Business Assistant
 
 ---
 
@@ -52,6 +52,21 @@ The backend is built with FastAPI, SQLAlchemy, Alembic, and PostgreSQL, while th
 - Stock Adjustment History
 - Low Stock Detection
 - Atomic Inventory Updates
+
+### Billing & Payments
+- Invoice Creation with auto-calculated subtotal, tax, discount, and total
+- Unique invoice numbers per business (format: `INV-{bid}-{timestamp}-{random}`)
+- Invoice item management (add, update, delete) with automatic total recalculation
+- Invoice status lifecycle: `UNPAID` → `PARTIALLY_PAID` → `PAID` → `CANCELLED`
+- Partial and full payment recording
+- Stock deduction **only** when invoice becomes `PAID` (atomic transaction)
+- `OUT` StockAdjustment created automatically on full payment
+- `IN` StockAdjustment on cancellation of a previously paid invoice
+- Overpayment prevention
+- Duplicate payment detection (10-second window)
+- Invoice filtering by customer, status, invoice number, and date range
+- Paginated invoice and payment listing
+- Role-based access: OWNER & MANAGER can cancel invoices; STAFF can create invoices and record payments
 
 ### Developer Experience
 - FastAPI Interactive Swagger UI
@@ -182,6 +197,20 @@ flutter run -d chrome
 | PATCH | `/businesses/{bid}/products/{pid}/deactivate` | Yes (OWNER, MANAGER) | Deactivate product |
 | POST | `/businesses/{bid}/products/{pid}/stock` | Yes (OWNER, MANAGER, STAFF) | Record stock adjustment (updates stock atomically) |
 | GET | `/businesses/{bid}/products/{pid}/stock` | Yes | List stock adjustment history (paginated) |
+| **Invoices** | | | |
+| POST | `/businesses/{bid}/invoices` | Yes (OWNER, MANAGER, STAFF) | Create invoice (status = UNPAID, inventory unchanged) |
+| GET | `/businesses/{bid}/invoices` | Yes | List/filter invoices (paginated) |
+| GET | `/businesses/{bid}/invoices/{iid}` | Yes | Get invoice by ID with items |
+| PATCH | `/businesses/{bid}/invoices/{iid}` | Yes (OWNER, MANAGER, STAFF) | Update invoice metadata (notes, dates, tax, discount) |
+| PATCH | `/businesses/{bid}/invoices/{iid}/cancel` | Yes (OWNER, MANAGER) | Cancel invoice; restore stock if previously PAID |
+| **Invoice Items** | | | |
+| POST | `/businesses/{bid}/invoices/{iid}/items` | Yes (OWNER, MANAGER, STAFF) | Add item to invoice; recalculates totals |
+| PATCH | `/businesses/{bid}/invoices/{iid}/items/{itmid}` | Yes (OWNER, MANAGER, STAFF) | Update item qty/price; recalculates totals |
+| DELETE | `/businesses/{bid}/invoices/{iid}/items/{itmid}` | Yes (OWNER, MANAGER, STAFF) | Delete item from invoice; recalculates totals |
+| **Payments** | | | |
+| POST | `/businesses/{bid}/invoices/{iid}/payments` | Yes (OWNER, MANAGER, STAFF) | Record payment; deducts stock only when invoice becomes PAID |
+| GET | `/businesses/{bid}/invoices/{iid}/payments` | Yes | List all payments for an invoice |
+| GET | `/businesses/{bid}/payments` | Yes | List all payments for a business (paginated) |
 
 ## Security Design
 - Membership access is backend-enforced. Non-members receive `404 Not Found` to prevent business existence leakage.
@@ -199,23 +228,26 @@ flutter run -d chrome
 | Phase 4 – Business Foundation | ✅ Complete |
 | Phase 5 – Customer Management | ✅ Complete |
 | Phase 6 – Products & Inventory Foundation | ✅ Complete |
-| Phase 7 – Billing & Payments | 🚧 Planned |
-| Phase 8 – Dashboard & Analytics | 🚧 Planned |
-| Phase 9 – Flutter + AI Business Assistant | 🚧 Planned |
+| Phase 7 – Billing & Payments | ✅ Complete |
+| Phase 8 – Dashboard & Analytics | ✅ Complete |
+| Phase 9 – Flutter + AI Business Assistant | ✅ Complete |
 | Phase 10 – Production & Deployment | 🚧 Planned |
 
-### Phase 6 Summary
+### Phase 7 Summary
 
-- ✅ Multi-tenant architecture implemented
-- ✅ JWT Authentication & RBAC
-- ✅ Business workspace management
-- ✅ Customer management
-- ✅ Product management
-- ✅ Inventory tracking with stock adjustments
-- ✅ Low-stock detection
-- ✅ Alembic database migrations
-- ✅ Swagger/OpenAPI documentation
-- ✅ Backend test suite (78 passed, 4 skipped)
+- ✅ Invoice model with `invoice_date` and `due_date` fields
+- ✅ Payment model with `business_id` for tenant isolation
+- ✅ Alembic migration `dc007ba0603e` applied (invoices, invoice_items, payments tables)
+- ✅ Pydantic v2 schemas for invoices, invoice items, and payments
+- ✅ Full invoice CRUD API with filters, search, and pagination
+- ✅ Invoice item sub-routes with automatic total recalculation
+- ✅ Payment recording with partial/full support and duplicate detection
+- ✅ Stock deduction & `OUT` StockAdjustment created **only** when invoice becomes PAID
+- ✅ Stock restoration & `IN` StockAdjustment on cancellation of a PAID invoice
+- ✅ Overpayment rejected with 400 error
+- ✅ Role-based access enforced: STAFF can create invoices/payments; OWNER & MANAGER can cancel
+- ✅ Atomic transactions with full rollback on failure
+- ✅ Backend test suite (101 passed, 4 skipped — 23 new Phase 7 tests)
   ## Roadmap
 
 ### ✅ Completed
@@ -224,16 +256,17 @@ flutter run -d chrome
 - Customer Management
 - Product Management
 - Inventory Foundation
-
-### 🚧 Next
 - Billing & Payments
-
-### 📅 Future
 - Dashboard & Analytics
 - Flutter Web Frontend
 - AI Business Assistant
+
+### 🚧 Next
 - Docker Deployment
 - CI/CD Pipeline
+
+### 📅 Future
+- Mobile App Expansion
 
 ## License
 

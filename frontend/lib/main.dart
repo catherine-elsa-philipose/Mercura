@@ -1,66 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'features/dashboard.dart';
+import 'features/assistant.dart';
 
 void main() {
-  runApp(const MercuraApp());
+  runApp(const ProviderScope(child: MercuraApp()));
 }
 
-class MercuraApp extends StatelessWidget {
+final routerProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: '/dashboard',
+    routes: [
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/assistant',
+        builder: (context, state) => const AssistantScreen(),
+      ),
+    ],
+  );
+});
+
+class MercuraApp extends ConsumerWidget {
   const MercuraApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mercura Platform',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    
+    return MaterialApp.router(
+      title: 'Mercura',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueGrey,
-          brightness: Brightness.light,
-        ),
         useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+        textTheme: GoogleFonts.interTextTheme(),
+        brightness: Brightness.light,
       ),
-      home: const MercuraStarterScreen(),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.system,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MercuraStarterScreen extends StatelessWidget {
-  const MercuraStarterScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mercura Platform'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.business,
-              size: 80,
-              color: Colors.blueGrey,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Mercura Project Foundation Ready',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Phase 1: Lightweight Project Foundation\n'
-              'Backend: FastAPI | Frontend: Flutter Web',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[700],
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
