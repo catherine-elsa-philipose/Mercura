@@ -9,6 +9,7 @@ from app.api.routes.customers import (
     create_customer,
     deactivate_customer,
     get_customer_or_404,
+    reactivate_customer,
 )
 from app.models.business import Business
 from app.models.business_member import BusinessRole
@@ -237,6 +238,59 @@ class TestCustomerDeactivation:
 
         with pytest.raises(HTTPException) as exc_info:
             deactivate_customer(
+                business_id=1,
+                customer_id=10,
+                db=mock_db,
+                membership=mock_membership,
+            )
+
+        assert exc_info.value.status_code == 500
+        mock_db.rollback.assert_called_once()
+
+
+class TestCustomerReactivation:
+    def test_owner_can_reactivate_customer_logic(self):
+        mock_db = MagicMock()
+        mock_membership = MagicMock()
+        mock_membership.role = BusinessRole.OWNER.value
+
+        mock_customer = MagicMock(spec=Customer)
+        mock_customer.is_active = False
+
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            mock_customer
+        )
+
+        result = reactivate_customer(
+            business_id=1,
+            customer_id=10,
+            db=mock_db,
+            membership=mock_membership,
+        )
+
+        assert result is mock_customer
+        assert mock_customer.is_active is True
+        mock_db.commit.assert_called_once()
+        mock_db.refresh.assert_called_once_with(mock_customer)
+
+    def test_rollback_called_on_reactivation_error(self):
+        mock_db = MagicMock()
+        mock_membership = MagicMock()
+        mock_membership.role = BusinessRole.OWNER.value
+
+        mock_customer = MagicMock(spec=Customer)
+        mock_customer.is_active = False
+
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            mock_customer
+        )
+
+        mock_db.commit.side_effect = SQLAlchemyError(
+            "simulated database error"
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            reactivate_customer(
                 business_id=1,
                 customer_id=10,
                 db=mock_db,

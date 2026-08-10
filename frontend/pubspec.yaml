@@ -37,6 +37,11 @@ dependencies:
   go_router: ^12.1.1
   shared_preferences: ^2.2.2
   google_fonts: ^6.1.0
+  fl_chart: ^0.66.0
+  flutter_markdown: ^0.6.18+3
+  shimmer: ^3.0.0
+  gap: ^3.0.1
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:

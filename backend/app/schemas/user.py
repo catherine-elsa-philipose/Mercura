@@ -5,6 +5,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     full_name: str = Field(..., max_length=100)
     password: str = Field(..., min_length=8)
+    business_name: str | None = Field(default=None, max_length=100)
 
     @field_validator("full_name")
     @classmethod

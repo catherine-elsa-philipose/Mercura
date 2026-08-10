@@ -15,6 +15,18 @@ class BusinessCreate(BaseModel):
             return trimmed
         return v
 
+class BusinessUpdate(BaseModel):
+    name: str = Field(None, max_length=100)
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def trim_name(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            trimmed = v.strip()
+            if not trimmed:
+                raise ValueError("Business name cannot be empty or whitespace only")
+            return trimmed
+        return v
 class BusinessResponse(BaseModel):
     id: int
     name: str

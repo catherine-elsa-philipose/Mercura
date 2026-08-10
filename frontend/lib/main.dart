@@ -1,29 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'features/dashboard.dart';
-import 'features/assistant.dart';
+import 'core/routing/router.dart';
+import 'core/theme/theme.dart';
 
 void main() {
   runApp(const ProviderScope(child: MercuraApp()));
 }
-
-final routerProvider = Provider<GoRouter>((ref) {
-  return GoRouter(
-    initialLocation: '/dashboard',
-    routes: [
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: '/assistant',
-        builder: (context, state) => const AssistantScreen(),
-      ),
-    ],
-  );
-});
 
 class MercuraApp extends ConsumerWidget {
   const MercuraApp({super.key});
@@ -34,18 +16,8 @@ class MercuraApp extends ConsumerWidget {
     
     return MaterialApp.router(
       title: 'Mercura',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-        textTheme: GoogleFonts.interTextTheme(),
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-        brightness: Brightness.dark,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,
       debugShowCheckedModeBanner: false,

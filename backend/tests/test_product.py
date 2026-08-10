@@ -14,6 +14,7 @@ from app.api.routes.products import (
     get_low_stock_products,
     create_stock_adjustment,
     list_stock_adjustments,
+    reactivate_product,
 )
 from app.models.business_member import BusinessRole
 from app.models.product import Product
@@ -521,6 +522,59 @@ class TestStockAdjustmentHistoryList:
         assert isinstance(result, StockAdjustmentListResponse)
         assert result.total == 2
         assert len(result.items) == 2
+
+
+class TestProductReactivation:
+    def test_owner_can_reactivate_product_logic(self):
+        mock_db = MagicMock()
+        mock_membership = MagicMock()
+        mock_membership.role = BusinessRole.OWNER.value
+
+        mock_product = MagicMock(spec=Product)
+        mock_product.is_active = False
+
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            mock_product
+        )
+
+        result = reactivate_product(
+            business_id=1,
+            product_id=10,
+            db=mock_db,
+            membership=mock_membership,
+        )
+
+        assert result is mock_product
+        assert mock_product.is_active is True
+        mock_db.commit.assert_called_once()
+        mock_db.refresh.assert_called_once_with(mock_product)
+
+    def test_rollback_called_on_reactivation_error(self):
+        mock_db = MagicMock()
+        mock_membership = MagicMock()
+        mock_membership.role = BusinessRole.OWNER.value
+
+        mock_product = MagicMock(spec=Product)
+        mock_product.is_active = False
+
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            mock_product
+        )
+
+        mock_db.commit.side_effect = SQLAlchemyError(
+            "simulated database error"
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            reactivate_product(
+                business_id=1,
+                product_id=10,
+                db=mock_db,
+                membership=mock_membership,
+            )
+
+        assert exc_info.value.status_code == 500
+        mock_db.rollback.assert_called_once()
 
 
 @pytest.mark.skip(

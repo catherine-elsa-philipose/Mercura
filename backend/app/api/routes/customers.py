@@ -140,6 +140,78 @@ def get_customer(
 
 
 @router.patch(
+    "/{customer_id}/deactivate",
+    response_model=CustomerResponse,
+)
+def deactivate_customer(
+    business_id: int,
+    customer_id: int,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(
+        require_roles(
+            BusinessRole.OWNER,
+            BusinessRole.MANAGER,
+        )
+    ),
+):
+    customer = get_customer_or_404(
+        business_id=business_id,
+        customer_id=customer_id,
+        db=db,
+    )
+
+    customer.is_active = False
+
+    try:
+        db.commit()
+        db.refresh(customer)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred while deactivating the customer.",
+        )
+
+    return customer
+
+
+@router.patch(
+    "/{customer_id}/reactivate",
+    response_model=CustomerResponse,
+)
+def reactivate_customer(
+    business_id: int,
+    customer_id: int,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(
+        require_roles(
+            BusinessRole.OWNER,
+            BusinessRole.MANAGER,
+        )
+    ),
+):
+    customer = get_customer_or_404(
+        business_id=business_id,
+        customer_id=customer_id,
+        db=db,
+    )
+
+    customer.is_active = True
+
+    try:
+        db.commit()
+        db.refresh(customer)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred while reactivating the customer.",
+        )
+
+    return customer
+
+
+@router.patch(
     "/{customer_id}",
     response_model=CustomerResponse,
 )
@@ -180,42 +252,6 @@ def update_customer(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="A database error occurred while updating the customer.",
-        )
-
-    return customer
-
-
-@router.patch(
-    "/{customer_id}/deactivate",
-    response_model=CustomerResponse,
-)
-def deactivate_customer(
-    business_id: int,
-    customer_id: int,
-    db: Session = Depends(get_db),
-    membership: BusinessMember = Depends(
-        require_roles(
-            BusinessRole.OWNER,
-            BusinessRole.MANAGER,
-        )
-    ),
-):
-    customer = get_customer_or_404(
-        business_id=business_id,
-        customer_id=customer_id,
-        db=db,
-    )
-
-    customer.is_active = False
-
-    try:
-        db.commit()
-        db.refresh(customer)
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="A database error occurred while deactivating the customer.",
         )
 
     return customer

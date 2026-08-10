@@ -187,6 +187,78 @@ def get_product(
 
 
 @router.patch(
+    "/{product_id}/deactivate",
+    response_model=ProductResponse,
+)
+def deactivate_product(
+    business_id: int,
+    product_id: int,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(
+        require_roles(
+            BusinessRole.OWNER,
+            BusinessRole.MANAGER,
+        )
+    ),
+):
+    product = get_product_or_404(
+        business_id=business_id,
+        product_id=product_id,
+        db=db,
+    )
+
+    product.is_active = False
+
+    try:
+        db.commit()
+        db.refresh(product)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred while deactivating the product.",
+        )
+
+    return product
+
+
+@router.patch(
+    "/{product_id}/reactivate",
+    response_model=ProductResponse,
+)
+def reactivate_product(
+    business_id: int,
+    product_id: int,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(
+        require_roles(
+            BusinessRole.OWNER,
+            BusinessRole.MANAGER,
+        )
+    ),
+):
+    product = get_product_or_404(
+        business_id=business_id,
+        product_id=product_id,
+        db=db,
+    )
+
+    product.is_active = True
+
+    try:
+        db.commit()
+        db.refresh(product)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred while reactivating the product.",
+        )
+
+    return product
+
+
+@router.patch(
     "/{product_id}",
     response_model=ProductResponse,
 )
@@ -224,40 +296,6 @@ def update_product(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="A database error occurred while updating the product.",
-        )
-
-    return product
-@router.patch(
-    "/{product_id}/deactivate",
-    response_model=ProductResponse,
-)
-def deactivate_product(
-    business_id: int,
-    product_id: int,
-    db: Session = Depends(get_db),
-    membership: BusinessMember = Depends(
-        require_roles(
-            BusinessRole.OWNER,
-            BusinessRole.MANAGER,
-        )
-    ),
-):
-    product = get_product_or_404(
-        business_id=business_id,
-        product_id=product_id,
-        db=db,
-    )
-
-    product.is_active = False
-
-    try:
-        db.commit()
-        db.refresh(product)
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="A database error occurred while deactivating the product.",
         )
 
     return product

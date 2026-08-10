@@ -9,9 +9,9 @@
 
 ## Current Version
 
-**Version:** v0.9.0
+**Version:** v1.0.0
 
-**Status:** Completed through Phase 9 – Flutter + AI Business Assistant
+**Status:** Completed through Phase 10 – Production & Deployment
 
 ---
 
@@ -170,6 +170,14 @@ flutter pub get
 flutter run -d chrome
 ```
 
+### Running with Docker Compose
+The entire application stack (Database, Backend, and Frontend) can be launched locally using Docker Compose:
+```bash
+docker compose up -d --build
+```
+The Flutter Web frontend will be accessible at http://localhost:8080, and the API docs at http://localhost:8080/api/docs.
+Refer to [docs/deployment.md](docs/deployment.md) for full deployment details.
+
 ## API Endpoints
 
 | Method | Path | Auth | Description |
@@ -231,7 +239,7 @@ flutter run -d chrome
 | Phase 7 – Billing & Payments | ✅ Complete |
 | Phase 8 – Dashboard & Analytics | ✅ Complete |
 | Phase 9 – Flutter + AI Business Assistant | ✅ Complete |
-| Phase 10 – Production & Deployment | 🚧 Planned |
+| Phase 10 – Production & Deployment | ✅ Complete |
 
 ### Phase 7 Summary
 
@@ -260,13 +268,11 @@ flutter run -d chrome
 - Dashboard & Analytics
 - Flutter Web Frontend
 - AI Business Assistant
-
-### 🚧 Next
-- Docker Deployment
+- Docker Deployment & Orchestration
 - CI/CD Pipeline
 
-### 📅 Future
-- Mobile App Expansion
+### 🚧 Next
+- Mobile App Expansion (planned)
 
 ## License
 

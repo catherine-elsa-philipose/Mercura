@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: mercura_db
+    environment:
+      - POSTGRES_USER=mercura_user
+      - POSTGRES_PASSWORD=mercura_password
+      - POSTGRES_DB=mercura_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercura_user -d mercura_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mercura_backend
+    environment:
+      - DATABASE_URL=postgresql+psycopg://mercura_user:mercura_password@db:5432/mercura_db
+      - SECRET_KEY=lj2HhK-Ckqao1k3bK19fputPwdmxBgjE1AYqpo_mqRY
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mercura_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.dependencies import get_db
-from app.api.deps import get_current_user, get_current_membership
+from app.api.deps import get_current_user, get_current_membership, require_roles
 from app.models.user import User
 from app.models.business import Business
 from app.models.business_member import BusinessMember, BusinessRole
 from app.models.customer import Customer
 from app.schemas.business import (
     BusinessCreate,
+    BusinessUpdate,
     BusinessResponse,
     BusinessWithRoleResponse,
 )
@@ -108,3 +109,46 @@ def get_business(
         "created_at": business.created_at,
         "updated_at": business.updated_at,
     }
+
+
+@router.put("/{business_id}", response_model=BusinessResponse)
+def update_business(
+    business_id: int,
+    business_in: BusinessUpdate,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(require_roles(BusinessRole.OWNER, BusinessRole.MANAGER)),
+):
+    business = membership.business
+
+    if business_in.name is not None:
+        business.name = business_in.name
+
+    try:
+        db.commit()
+        db.refresh(business)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update the business workspace.",
+        )
+
+    return business
+
+
+@router.delete("/{business_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_business(
+    business_id: int,
+    db: Session = Depends(get_db),
+    membership: BusinessMember = Depends(require_roles(BusinessRole.OWNER)),
+):
+    business = membership.business
+    try:
+        db.delete(business)
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete the business workspace.",
+        )
